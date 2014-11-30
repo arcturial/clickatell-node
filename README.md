@@ -19,7 +19,7 @@ TBC
 The available calls should be defined as the following. Whenever you write a new adapter (API type) you should also try to stick
 to this interface.
 
-``` js
+```javascript
 
 sendMessage(to, message, extra, callback);
 
@@ -37,7 +37,7 @@ getMessageCharge(apiMsgId, callback);
 
 The callback uses the standard way of handling response and will be invoked with the following parameters:
 
-``` js
+```javascript
 
 sendMessage(["0000000000"], "My Message", {}, function (err, messages) {
 
