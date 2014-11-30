@@ -1,0 +1,26 @@
+{
+    "name": "clickatell-node",
+    "version": "0.0.1",
+    "description": "Library for Clickatell SMS gateway APIs",
+    "author": "Chris Brand <chris@cainsvault.com> (http://www.cainsvault.com/)",
+    "main": "./src/index.js",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/brentertz/scapegoat.git"
+    },
+    "bugs": {
+        "url": "https://github.com/arcturial/clickatell-node/issues"
+    },
+    "keywords": [
+        "clickatell",
+        "api",
+        "sms"
+    ],
+    "license": "GNU",
+    "dependencies": {
+        "q": "1.0",
+        "merge": "1.2.0"
+    },
+    "devDependencies": {
+    }
+}
