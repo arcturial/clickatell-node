@@ -1,7 +1,10 @@
 Clickatell SMS Messenger Library (NodeJS)
 =========================================
 
+Master: [![Build Status](https://secure.travis-ci.org/arcturial/clickatell-node.png?branch=master)](http://travis-ci.org/arcturial/clickatell)
+
 This library allows easy access to connecting the [Clickatell's](http://www.clickatell.com) different messenging API's.
+
 
 1. Installation
 ------------------
