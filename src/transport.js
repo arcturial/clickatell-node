@@ -28,8 +28,8 @@ function Transport()
         var query = querystring.stringify(args);
         query = query ? "?" + query : "";
 
-        options.path = uri + query;
         options = merge(self.options, options);
+        options.path = uri + (options.method == 'GET' ? query : '');
 
         // Run the HTTP request and register the callback listener.
         var req = http.request(options, function (res) {
@@ -55,7 +55,7 @@ function Transport()
         });
 
         // Finalize the request
-        req.end();
+        req.end(options.method == "POST" ? args : '');
     }
 }
 

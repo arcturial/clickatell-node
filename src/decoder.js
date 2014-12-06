@@ -5,6 +5,17 @@
  */
 
 module.exports = {
+    decodeRest: function (data) {
+        var data = JSON.parse(data);
+
+        if (typeof data.error !== 'undefined') {
+            var response = new Error(data.error.description);
+            response.code = data.error.code;
+            throw response;
+        }
+
+        return data.data;
+    },
     // This function is responsible for parsing the text packets that Clickatell
     // returns. Their format is inconsistent so any exceptions also needs to be handled
     // in this function.
