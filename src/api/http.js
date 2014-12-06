@@ -133,8 +133,8 @@ function Http(user, password, apiId)
      *
      * @return self
      */
-    self.queryMessage = function (apiMsgId) {
-        return self.getMessageCharge(apiMsgId);
+    self.queryMessage = function (apiMsgId, callback) {
+        return self.getMessageCharge(apiMsgId, callback);
     }
 
     /**
