@@ -23,6 +23,8 @@ function Http(user, password, apiId)
 }
 
 // Apply request and response filters to any transport invocation.
+// This methods adds the HTTP methods and arguments used in the HTTP
+// API. It also unwraps the content to parse those plain text responses.
 Http.prototype._invoke = function (uri, args, callback, throwErr) {
     var self = this;
     args.user = self.user;
