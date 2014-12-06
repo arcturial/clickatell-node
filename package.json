@@ -6,7 +6,7 @@
     "main": "./src/index.js",
     "repository": {
         "type": "git",
-        "url": "git://github.com/brentertz/scapegoat.git"
+        "url": "git://github.com/arcturial/clickatell-node.git"
     },
     "bugs": {
         "url": "https://github.com/arcturial/clickatell-node/issues"
@@ -22,5 +22,6 @@
         "merge": "1.2.0"
     },
     "devDependencies": {
+        "mocha": "*"
     }
 }
