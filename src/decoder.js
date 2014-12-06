@@ -8,8 +8,9 @@ module.exports = {
     // This function is responsible for parsing the text packets that Clickatell
     // returns. Their format is inconsistent so any exceptions also needs to be handled
     // in this function.
-    unwrapLegacy: function (data) {
+    unwrapLegacy: function (data, throwErr) {
 
+        throwErr = throwErr == null ? true : throwErr;
         var lines = data.trim("\n").split("\n");
         var result = [];
         var re = new RegExp(/([A-Za-z]+):((.(?![A-Za-z]+:))*)/g);
@@ -36,7 +37,7 @@ module.exports = {
 
                 // If this response only has one value then we will
                 // raise an exception to be handled.
-                if (lines.length == 1) {
+                if (lines.length == 1 && throwErr) {
                     var response = new Error(row['error']);
                     response.code = row['code'];
                     throw response;

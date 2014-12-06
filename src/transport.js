@@ -8,12 +8,9 @@ var merge       = require('merge');
 var http        = require('http');
 var querystring = require('querystring');
 
-function Transport(filter, responseFilter)
+function Transport()
 {
     var self = this;
-
-    filter = filter || null;
-    responseFilter = responseFilter || null;
 
     // Define the default httpOptions to use
     // for our request to the Clickatell API.
@@ -26,15 +23,13 @@ function Transport(filter, responseFilter)
         }
     };
 
-    self.call = function (uri, args, callback) {
-        // Run the request filter. This allows us to set headers
-        // or modify arguments before sending the request
-        filter != null && filter.apply(this, [args, self.options]);
+    self.call = function (uri, args, options, callback) {
 
         var query = querystring.stringify(args);
         query = query ? "?" + query : "";
 
-        var options = merge(self.options, { path: uri + query });
+        options.path = uri + query;
+        options = merge(self.options, options);
 
         // Run the HTTP request and register the callback listener.
         var req = http.request(options, function (res) {
@@ -46,13 +41,6 @@ function Transport(filter, responseFilter)
 
             res.on('end', function () {
                 var content = Buffer.concat(data).toString('utf8');
-
-                try {
-                    responseFilter != null && (content = responseFilter.apply(self, [content]));
-                } catch (e) {
-                    callback.apply(self, [null, e]);
-                    return false;
-                }
 
                 // If the response filter wasn't specified or did not fail...only
                 // then can we be sure that our content is safe.
@@ -71,8 +59,4 @@ function Transport(filter, responseFilter)
     }
 }
 
-module.exports = {
-    create: function (filter, responseFilter) {
-        return new Transport(filter, responseFilter);
-    }
-}
+module.exports = Transport;

@@ -26,6 +26,6 @@
         "nock": "*"
     },
     "scripts": {
-        "test": "node node_modules/mocha/bin/mocha"
+        "test": "node node_modules/mocha/bin/mocha --recursive"
     }
 }

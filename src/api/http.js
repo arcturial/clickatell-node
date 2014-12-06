@@ -8,10 +8,11 @@
  *
  */
 
-var transport   = require('./../transport');
+var Transport   = require('./../transport');
 var decoder     = require('./../decoder');
 var merge       = require('merge');
 var diagnostic  = require('./../diagnostic');
+var transport   = new Transport;
 
 function Http(user, password, apiId)
 {
@@ -19,163 +20,140 @@ function Http(user, password, apiId)
     self.user = user;
     self.password = password;
     self.apiId = apiId;
+}
 
-    // Initialize a new transport protocol and register a callback
-    // that will give us a chance to filter the arguments and headers
-    // that are passed with the HTTP call.
-    var protocol = transport.create(
-        function (args, options) {
-            args.user = user;
-            args.password = password;
-            args.api_id = apiId;
-            options.method = 'GET';
-            options.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
+// Apply request and response filters to any transport invocation.
+Http.prototype._invoke = function (uri, args, callback, throwErr) {
+    var self = this;
+    args.user = self.user;
+    args.password = self.password;
+    args.api_id = self.apiId;
+
+    var options = {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         },
-        function (content) {
-            return decoder.unwrapLegacy(content);
-        }
+        method: "GET"
+    };
+
+    transport.call(uri, args, options, function (content, err) {
+        if (!err) (content = decoder.unwrapLegacy(content, throwErr));
+        callback.apply(self, [content, err]);
+    });
+}
+
+
+Http.prototype.sendMessage = function (to, message, extra, callback) {
+
+    var self = this;
+
+    // Merge parameter defaults together with the
+    // requested parameters.
+    var args = merge(
+        {
+            mo: 1,
+            callback: 7,
+            to: to.join(","),
+            text: message
+        },
+        extra
     );
 
-    /**
-     * The "extra" parameter allows you to pass any field that clickatell supports
-     * for this API call.
-     *
-     * @return self
-     */
-    self.sendMessage = function (to, message, extra, callback) {
-        // Merge parameter defaults together with the
-        // requested parameters.
-        var args = merge(
-            extra,
-            {
-                mo: 1,
-                callback: 7,
-                to: to.join(","),
-                text: message
-            }
-        );
+    self._invoke('/http/sendmsg', args, function (content, err) {
 
-        protocol.call('/http/sendmsg', args, function (content, err) {
+        // The sendmsg can't really fail. Since the call might succeed, but the message
+        // might be in a "non-delivered" state. We will always return an array of messages and
+        // the errors will be contained within the message data.
+        if (err) content = { error: err.message, code: err.code };
+        var messages = [];
 
-            // The sendmsg can't really fail. Since the call might succeed, but the message
-            // might be in a "non-delivered" state. We will always return an array of messages and
-            // the errors will be contained within the message data.
-            if (err) content = { error: err.message, code: err.code };
-            var messages = [];
+        // Always return an array so we can make sure it's a consistent response format;
+        content = (Object.keys(content))[0] === '0' ? content : [content];
 
-            // Always return an array so we can make sure it's a consistent response format;
-            content = (Object.keys(content))[0] === 0 ? content : [content];
+        for (var key in content) {
+            var message = content[key];
 
-            for (var key in content) {
-                var message = content[key];
+            // Build up a new message from the fields that we acquired from the API response.
+            messages.push({
+                id: typeof message.ID !== 'undefined' ? message.ID : false,
+                destination: typeof message.To !== 'undefined' ? message.To: false,
+                error: typeof message.error !== 'undefined' ? message.error: false,
+                code: typeof message.code !== 'undefined' ? message.code : false
+            });
+        }
 
-                // Build up a new message from the fields that we acquired from the API response.
-                messages.push({
-                    id: typeof message.ID !== 'undefined' ? message.ID : false,
-                    destination: typeof message.To !== 'undefined' ? message.To: false,
-                    error: typeof message.error !== 'undefined' ? message.error: false,
-                    code: typeof message.code !== 'undefined' ? message.code : false
-                });
-            }
+        // Resolve the promised object.
+        callback.apply(self, [null, messages]);
+    }, false);
 
-            // Resolve the promised object.
-            callback.apply(self, [null, messages]);
-        });
+    return self;
+}
 
-        return self;
-    }
+Http.prototype.getBalance = function (callback) {
+    var self = this;
 
-    /**
-     * Retrieve the user balance.
-     *
-     * @return self
-     */
-    self.getBalance = function (callback) {
+    self._invoke('/http/getbalance', {}, function (content, err) {
+        if (err) return callback.call(self, err);
 
-        protocol.call('/http/getbalance', {}, function (content, err) {
-            if (err) return callback.call(self, err);
+        callback.apply(self, [null, {
+            balance: parseFloat(content.Credit)
+        }]);
+    });
 
-            callback.apply(self, [null, {
-                balance: parseFloat(content.Credit)
-            }]);
-        });
+    return self;
+}
 
-        return self;
-    }
+Http.prototype.stopMessage = function (apiMsgId, callback) {
+    var self = this;
 
-    /**
-     * Stop a specific message ID from being delivered. Only works if the message has
-     * not been delivered yet off course.
-     *
-     *
-     * @return self
-     */
-    self.stopMessage = function (apiMsgId, callback) {
+    self._invoke('/http/delmsg', { apimsgid: apiMsgId }, function (content, err) {
+        if (err) return callback.call(self, err);
 
-        protocol.call('/http/delmsg', { apimsgid: apiMsgId }, function (content, err) {
-            if (err) return callback.call(self, err);
+        callback.apply(self, [null, {
+            id: content.ID,
+            status: content.Status,
+            description: diagnostic[content.Status]
+        }]);
+    });
 
-            callback.apply(self, [null, {
-                id: content.ID,
-                status: content.Status,
-                description: diagnostic[content.Status]
-            }]);
-        });
+    return self;
+}
 
-        return self;
-    }
+Http.prototype.queryMessage = function (apiMsgId, callback) {
+    var self = this;
+    return self.getMessageCharge(apiMsgId, callback);
+}
 
-    /**
-     * Query the status of a specific message.
-     *
-     * Alias for getMessageCharge
-     *
-     * @return self
-     */
-    self.queryMessage = function (apiMsgId, callback) {
-        return self.getMessageCharge(apiMsgId, callback);
-    }
+Http.prototype.routeCoverage = function (msisdn, callback) {
+    var self = this;
 
-    /**
-     * Check to see if a specific number is covered by the Clickatell
-     * network.
-     *
-     * @return self
-     */
-    self.routeCoverage = function (msisdn, callback) {
+    self._invoke('/utils/routeCoverage', { msisdn: msisdn }, function (content, err) {
 
-        protocol.call('/utils/routeCoverage', { msisdn: msisdn }, function (content, err) {
+        content = {
+            routable: err ? false : true,
+            msisdn: msisdn,
+            charge: err ? 0 : content.Charge
+        }
 
-            content = {
-                routable: err ? false : true,
-                msisdn: msisdn,
-                charge: err ? 0 : content.Charge
-            }
+        return callback.apply(self, [null, content])
+    });
 
-            return callback.apply(self, [null, content])
-        });
+    return self;
+}
 
-        return self;
-    }
+Http.prototype.getMessageCharge = function (apiMsgId, callback) {
+    var self = this;
 
-    /**
-     * Get the message charge and status.
-     *
-     * @return self
-     */
-    self.getMessageCharge = function (apiMsgId, callback) {
+    self._invoke('/http/getmsgcharge', { apimsgid: apiMsgId }, function (content, err) {
+        if (err) return callback.call(self, err);
 
-        protocol.call('/http/getmsgcharge', { apimsgid: apiMsgId }, function (content, err) {
-            if (err) return callback.call(self, err);
-
-            callback.apply(self, [null, {
-                id: apiMsgId,
-                status: content.status,
-                description: diagnostic[content.status],
-                charge: parseFloat(content.charge)
-            }]);
-        });
-    }
+        callback.apply(self, [null, {
+            id: apiMsgId,
+            status: content.status,
+            description: diagnostic[content.status],
+            charge: parseFloat(content.charge)
+        }]);
+    });
 }
 
 module.exports = Http;
