@@ -19,7 +19,6 @@ function Http(user, password, apiId)
     self.user = user;
     self.password = password;
     self.apiId = apiId;
-    self.secure = false
 
     // Initialize a new transport protocol and register a callback
     // that will give us a chance to filter the arguments and headers
