@@ -35,4 +35,32 @@ describe("decoder.js", function () {
             assert.equal(result['To'], 123);
         });
     });
+
+    describe("decodeRest", function () {
+
+        it("should throw an error if one exists.", function () {
+
+            var data = JSON.stringify({
+                error: {
+                    description: "Some error",
+                    code: 100
+                }
+            });
+
+            assert.throws(function () { decoder.decodeRest(data); }, Error, 'Some error');
+        });
+
+        it("should return the 'data' parameter in a response.", function () {
+
+            var data = JSON.stringify({
+                data: {
+                    balance: 100
+                }
+            });
+
+            var result = decoder.decodeRest(data);
+
+            assert.equal(100, result.balance);
+        })
+    });
 });

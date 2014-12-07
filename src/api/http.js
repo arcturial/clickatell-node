@@ -39,12 +39,22 @@ Http.prototype._invoke = function (uri, args, callback, throwErr) {
     };
 
     transport.call(uri, args, options, function (content, err) {
-        if (!err) (content = decoder.unwrapLegacy(content, throwErr));
-        callback.apply(self, [content, err]);
+
+        try {
+            if (err) throw err;
+            content = decoder.unwrapLegacy(content, throwErr);
+            callback.apply(self, [content, null]);
+        } catch (e) {
+            callback.apply(self, [null, e]);
+        }
     });
 }
 
-
+/**
+ * https://www.clickatell.com/downloads/http/Clickatell_HTTP.pdf
+ *
+ * Section 3.3
+ */
 Http.prototype.sendMessage = function (to, message, extra, callback) {
 
     var self = this;
@@ -91,10 +101,16 @@ Http.prototype.sendMessage = function (to, message, extra, callback) {
     return self;
 }
 
+/**
+ * https://www.clickatell.com/downloads/http/Clickatell_HTTP.pdf
+ *
+ * Section 5.2
+ */
 Http.prototype.getBalance = function (callback) {
     var self = this;
 
     self._invoke('/http/getbalance', {}, function (content, err) {
+
         if (err) return callback.call(self, err);
 
         callback.apply(self, [null, {
@@ -105,6 +121,11 @@ Http.prototype.getBalance = function (callback) {
     return self;
 }
 
+/**
+ * https://www.clickatell.com/downloads/http/Clickatell_HTTP.pdf
+ *
+ * Section 5.1
+ */
 Http.prototype.stopMessage = function (apiMsgId, callback) {
     var self = this;
 
@@ -121,11 +142,21 @@ Http.prototype.stopMessage = function (apiMsgId, callback) {
     return self;
 }
 
+/**
+ * https://www.clickatell.com/downloads/http/Clickatell_HTTP.pdf
+ *
+ * Section 3.4
+ */
 Http.prototype.queryMessage = function (apiMsgId, callback) {
     var self = this;
     return self.getMessageCharge(apiMsgId, callback);
 }
 
+/**
+ * https://www.clickatell.com/downloads/http/Clickatell_HTTP.pdf
+ *
+ * Section 5.3
+ */
 Http.prototype.routeCoverage = function (msisdn, callback) {
     var self = this;
 
@@ -143,6 +174,11 @@ Http.prototype.routeCoverage = function (msisdn, callback) {
     return self;
 }
 
+/**
+ * https://www.clickatell.com/downloads/http/Clickatell_HTTP.pdf
+ *
+ * Section 5.6
+ */
 Http.prototype.getMessageCharge = function (apiMsgId, callback) {
     var self = this;
 

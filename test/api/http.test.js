@@ -1,6 +1,7 @@
-var assert  = require("assert");
-var Http    = require("./../../src/api/http");
-var nock    = require("nock");
+var assert      = require("assert");
+var Http        = require("./../../src/api/http");
+var diagnostic  = require("./../../src/diagnostic");
+var nock        = require("nock");
 
 
 var user = "user";
@@ -66,6 +67,172 @@ describe("http.js", function () {
                 done();
             });
         });
+    });
+
+
+    describe("getBalance", function () {
+
+
+        it("should return an error if the call was incorrectly formatted", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/http/getbalance?user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'ERR: 301, Some error');
+
+            var api = new Http(user, pass, apiId);
+
+            api.getBalance(function (err, content) {
+
+                assert(err instanceof Error);
+                assert.equal(301, err.code);
+                assert.equal('Some error', err.message);
+                done();
+            });
+        });
+
+        it("should return the balance from the 'Credit' field", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/http/getbalance?user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'Credit: 101');
+
+            var api = new Http(user, pass, apiId);
+
+            api.getBalance(function (err, content) {
+
+                assert.equal(101, content.balance);
+                done();
+            });
+        });
+
+    });
+
+    describe("stopMessage", function () {
+
+        it("should return an error if the call failed", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/http/delmsg?apimsgid=123456&user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'ERR: 301, Some error');
+
+            var api = new Http(user, pass, apiId);
+
+            api.stopMessage("123456", function (err, content) {
+                assert(err instanceof Error);
+                assert.equal(301, err.code);
+                assert.equal('Some error', err.message);
+                done();
+            });
+
+        });
+
+        it("should return the message details if call was succesful", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/http/delmsg?apimsgid=123456&user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'ID: 123456 Status: 004');
+
+            var api = new Http(user, pass, apiId);
+
+            api.stopMessage("123456", function (err, content) {
+                assert.equal("123456", content.id);
+                assert.equal("004", content.status);
+                assert.equal(diagnostic["004"], content.description);
+                done();
+            });
+
+        });
+
+    });
+
+    describe("queryMessage", function () {
+
+        it("should forward the call to getMessageCharge", function (done) {
+
+            var api = new Http(user, pass, apiId);
+
+            api.getMessageCharge = function (apiMsgId, callback) {
+                callback.apply(this, [null, true]);
+            };
+
+            api.queryMessage("123456", function (err, content) {
+                assert(content);
+                done();
+            });
+        });
+
+    });
+
+    describe("routeCoverage", function () {
+
+        it("should return a non routable response incase of error", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/utils/routeCoverage?msisdn=123456&user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'ERR: 301, Some error');
+
+            var api = new Http(user, pass, apiId);
+            api.routeCoverage("123456", function (err, content) {
+                assert(err == null);
+                assert.equal(false, content.routable);
+                done();
+            });
+        });
+
+        it("should return a routable status if successful", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/utils/routeCoverage?msisdn=123456&user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'Charge: 100');
+
+            var api = new Http(user, pass, apiId);
+            api.routeCoverage("123456", function (err, content) {
+                assert(err == null);
+                assert.equal(true, content.routable);
+                assert.equal(100, content.charge);
+                assert.equal("123456", content.msisdn);
+                done();
+            });
+
+        });
+    });
+
+    describe("getMessageCharge", function () {
+
+
+        it("should return an error if the request fails", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/http/getmsgcharge?apimsgid=123456&user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'ERR: 301, Some error');
+
+            var api = new Http(user, pass, apiId);
+            api.getMessageCharge("123456", function (err, content) {
+                assert(err instanceof Error);
+                assert.equal(301, err.code);
+                assert.equal('Some error', err.message);
+                done();
+            });
+
+        });
+
+        it("should return the correct fields upon success", function (done) {
+
+            nock('http://api.clickatell.com')
+                .get('/http/getmsgcharge?apimsgid=123456&user=' + user + '&password=' + pass + '&api_id=' + apiId)
+                .reply(200, 'status: 004 charge: 101');
+
+            var api = new Http(user, pass, apiId);
+            api.getMessageCharge("123456", function (err, content) {
+
+                assert.equal(101, content.charge);
+                assert.equal("004", content.status);
+                assert.equal(diagnostic[content.status], content.description);
+                done();
+            });
+
+        });
+
     });
 
 });

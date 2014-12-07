@@ -49,8 +49,10 @@ Rest.prototype._invoke = function (uri, args, method, callback) {
     });
 }
 
+/**
+ * http://www.clickatell.com/help/apidocs/#Message.htm#SendMessage
+ */
 Rest.prototype.sendMessage = function (to, message, extra, callback) {
-
     var self = this;
 
     // Merge parameter defaults together with the
@@ -89,24 +91,80 @@ Rest.prototype.sendMessage = function (to, message, extra, callback) {
     return self;
 }
 
+/**
+ * http://www.clickatell.com/help/apidocs/#account-balance.htm%3FTocPath%3DClickatell%2520REST%2520API%2520Resources|_____3
+ */
 Rest.prototype.getBalance = function (callback) {
+    var self = this;
 
+    self._invoke('/rest/account/balance', {}, 'GET', function (content, err) {
+        if (err) return callback.call(self, err);
+        callback.apply(self, [null, { balance: content.balance }]);
+    });
 }
 
+/**
+ * http://www.clickatell.com/help/apidocs/#Message.htm#StopMessage
+ */
 Rest.prototype.stopMessage = function (apiMsgId, callback) {
+    var self = this;
 
+    self._invoke('/rest/message/' + apiMsgId, {}, 'DELETE', function (content, err) {
+        if (err) return callback.call(self, err);
+
+        var response = {
+            id: content.apiMessageId,
+            status: content.messageStatus,
+            description: diagnostic[content.messageStatus],
+        }
+
+        callback.apply(self, [null, response]);
+    });
 }
 
+/**
+ * http://www.clickatell.com/help/apidocs/#Message.htm#QueryMsgStatus
+ */
 Rest.prototype.queryMessage = function (apiMsgId, callback) {
     return self.getMessageCharge(apiMsgId, callback);
 }
 
+/**
+ * http://www.clickatell.com/help/apidocs/#Coverage.htm%3FTocPath%3DClickatell%2520REST%2520API%2520Resources|_____1
+ */
 Rest.prototype.routeCoverage = function (msisdn, callback) {
+    var self = this;
 
+    self._invoke('/rest/coverage/' + msisdn, {}, 'GET', function (content, err) {
+        if (err) return callback.call(self, err);
+
+        var response = {
+            routable: content.routable,
+            destination: content.destination,
+            charge: content.minimumCharge
+        }
+
+        callback.apply(self, [null, response]);
+    });
 }
 
+/**
+ * http://www.clickatell.com/help/apidocs/#Message.htm#QueryMsgStatus
+ */
 Rest.prototype.getMessageCharge = function (apiMsgId, callback) {
+    var self = this;
 
+    self._invoke('/rest/message/' + apiMsgId, {}, 'GET', function (content, err) {
+        if (err) return callback.call(self, err);
+
+        var response = {
+            id: content.apiMessageId,
+            status: content.messageStatus,
+            description: diagnostic[content.messageStatus]
+        }
+
+        callback.apply(self, [null, response]);
+    });
 }
 
 module.exports = Rest;
