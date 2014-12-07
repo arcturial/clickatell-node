@@ -9,12 +9,38 @@ This library allows easy access to connecting the [Clickatell's](http://www.clic
 1. Installation
 ------------------
 
-TBC
+This library is managed by the **Node Package Manager**
+
+`npm install clickatell-node`
 
 2. Usage
 ------------------
 
-TBC
+All calls are asynchronous and the parameters follows the nodeJS convention of specifying any errors as the first parameter and the
+response as the second.
+
+```javascript
+
+var clickatell = require('clickatell-node');
+
+clickatell.sendMessage(["00000000000"], "My Message", {}, function (err, messages) {
+
+    for (var key in messages) {
+        var message = messages[key];
+
+        console.log(message);
+
+        // Message response format:
+        // message.id (false if error)
+        // message.destination
+        // message.error (false if no error)
+        // message.code (false if no error)
+    }
+
+});
+
+```
+
 
 3. Supported API calls
 ------------------
@@ -48,7 +74,12 @@ sendMessage(["0000000000"], "My Message", {}, function (err, messages) {
 
 ```
 
-4. Events
+4. SendMessage parameters that are not supported
 ---------------
 
-TBC
+The `sendMessage` calls supports a third parameter called `extra`. This parameter can be used to specify any values in the [Clickatell documentation](http://www.clickatell.com) that the library does not support as part of the public interface.
+
+5. Testing
+---------------
+
+To run the library test suite just execute `npm test` from the library root. Please make sure all tests are passing before pushing back any changes.
