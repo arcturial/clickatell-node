@@ -27,7 +27,6 @@ Rest.prototype._invoke = function (uri, args, method, callback) {
 
     var options = {
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
             'Authorization': 'Bearer ' + self.token,
             'Content-Type': 'application/json',
             'X-Version': '1',
@@ -79,8 +78,8 @@ Rest.prototype.sendMessage = function (to, message, extra, callback) {
             messages.push({
                 id: message.apiMessageId !== '' ? message.apiMessageId : false,
                 destination: typeof message.to !== 'undefined' ? message.to: false,
-                error: typeof message.error !== 'undefined' ? message.error.description : false,
-                code: typeof message.error !== 'undefined' ? message.error.code : false
+                error: typeof message.error !== 'undefined' && message.error ? message.error.description : false,
+                code: typeof message.error !== 'undefined' && message.error ? message.error.code : false
             });
         }
 
@@ -126,6 +125,7 @@ Rest.prototype.stopMessage = function (apiMsgId, callback) {
  * http://www.clickatell.com/help/apidocs/#Message.htm#QueryMsgStatus
  */
 Rest.prototype.queryMessage = function (apiMsgId, callback) {
+    var self = this;
     return self.getMessageCharge(apiMsgId, callback);
 }
 
@@ -160,7 +160,8 @@ Rest.prototype.getMessageCharge = function (apiMsgId, callback) {
         var response = {
             id: content.apiMessageId,
             status: content.messageStatus,
-            description: diagnostic[content.messageStatus]
+            description: diagnostic[content.messageStatus],
+            charge: content.charge
         }
 
         callback.apply(self, [null, response]);
