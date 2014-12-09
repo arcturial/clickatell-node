@@ -1,6 +1,6 @@
 {
     "name": "clickatell-node",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Library for Clickatell SMS gateway APIs",
     "author": "Chris Brand <chris@cainsvault.com> (http://www.cainsvault.com/)",
     "main": "./src/index.js",
