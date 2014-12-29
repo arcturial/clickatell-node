@@ -1,4 +1,4 @@
-Clickatell SMS Messenger Library (NodeJS)
+Clickatell NodeJS Library
 =========================================
 
 Master: [![Build Status](https://secure.travis-ci.org/arcturial/clickatell-node.png?branch=master)](http://travis-ci.org/arcturial/clickatell)
@@ -21,7 +21,8 @@ response as the second.
 
 ```javascript
 
-var clickatell = require('clickatell-node');
+var clickatell = require('clickatell-node').http(user, pass, api_id);
+// var clickatell = require('clickatell-node').rest(token);
 
 clickatell.sendMessage(["00000000000"], "My Message", {}, function (err, messages) {
 
