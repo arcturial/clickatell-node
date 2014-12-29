@@ -88,7 +88,7 @@ Http.prototype.sendMessage = function (to, message, extra, callback) {
             // Build up a new message from the fields that we acquired from the API response.
             messages.push({
                 id: typeof message.ID !== 'undefined' ? message.ID : false,
-                destination: typeof message.To !== 'undefined' ? message.To: false,
+                destination: typeof message.To !== 'undefined' ? message.To: args['to'],
                 error: typeof message.error !== 'undefined' ? message.error: false,
                 code: typeof message.code !== 'undefined' ? message.code : false
             });
