@@ -19,7 +19,8 @@ function Transport()
         port: 80,
         method: 'GET',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+            'User-Agent': 'ClickatellNode/0.0.2 http NodeJS/' + process.version
         }
     };
 

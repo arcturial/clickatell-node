@@ -22,7 +22,7 @@
     },
     "devDependencies": {
         "mocha": "*",
-        "nock": "*"
+        "nock": "0.52.4"
     },
     "scripts": {
         "test": "node node_modules/mocha/bin/mocha --recursive"
