@@ -1,30 +1,30 @@
 {
-    "name": "clickatell-node",
-    "version": "0.0.2",
-    "description": "Library for Clickatell SMS gateway APIs",
-    "author": "Chris Brand <chris@cainsvault.com> (http://www.cainsvault.com/)",
-    "main": "./src/index.js",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/arcturial/clickatell-node.git"
-    },
-    "bugs": {
-        "url": "https://github.com/arcturial/clickatell-node/issues"
-    },
-    "keywords": [
-        "clickatell",
-        "api",
-        "sms"
-    ],
-    "license": "GNU",
-    "dependencies": {
-        "merge": "1.2.0"
-    },
-    "devDependencies": {
-        "mocha": "*",
-        "nock": "0.52.4"
-    },
-    "scripts": {
-        "test": "node node_modules/mocha/bin/mocha --recursive"
-    }
+  "name": "clickatell-node",
+  "version": "0.0.3",
+  "description": "Library for Clickatell SMS gateway APIs",
+  "author": "Chris Brand <chris@cainsvault.com> (http://www.cainsvault.com/)",
+  "main": "./src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/arcturial/clickatell-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arcturial/clickatell-node/issues"
+  },
+  "keywords": [
+    "clickatell",
+    "api",
+    "sms"
+  ],
+  "license": "GNU",
+  "dependencies": {
+    "merge": "1.2.0"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "nock": "0.52.4"
+  },
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha --recursive"
+  }
 }
