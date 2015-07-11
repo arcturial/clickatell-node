@@ -20,7 +20,7 @@ function Transport()
         method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-            'User-Agent': 'ClickatellNode/0.0.2 http NodeJS/' + process.version
+            'User-Agent': 'ClickatellNode/0.0.3 http NodeJS/' + process.version
         }
     };
 
@@ -29,7 +29,7 @@ function Transport()
         var query = querystring.stringify(args);
         query = query ? "?" + query : "";
 
-        options = merge(self.options, options);
+        options = merge.recursive(true, self.options, options);
         options.path = uri + (options.method == 'GET' ? query : '');
 
         // Run the HTTP request and register the callback listener.

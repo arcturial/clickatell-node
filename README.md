@@ -6,15 +6,13 @@ Master: [![Build Status](https://secure.travis-ci.org/arcturial/clickatell-node.
 This library allows easy access to connecting the [Clickatell's](http://www.clickatell.com) different messenging API's.
 
 
-1. Installation
-------------------
+## Installation
 
 This library is managed by the **Node Package Manager**
 
 `npm install clickatell-node`
 
-2. Usage
-------------------
+## Usage
 
 All calls are asynchronous and the parameters follows the nodeJS convention of specifying any errors as the first parameter and the
 response as the second.
@@ -42,9 +40,12 @@ clickatell.sendMessage(["00000000000"], "My Message", {}, function (err, message
 
 ```
 
+### sendMessage parameters that are not supported
 
-3. Supported API calls
-------------------
+The `sendMessage` calls supports a third parameter called `extra`. This parameter can be used to specify any values in the [Clickatell documentation](http://www.clickatell.com) that the library does not support as part of the public interface.
+
+
+## Supported API calls
 
 The available calls should be defined as the following. Whenever you write a new adapter (API type) you should also try to stick
 to this interface.
@@ -75,12 +76,6 @@ sendMessage(["0000000000"], "My Message", {}, function (err, messages) {
 
 ```
 
-4. SendMessage parameters that are not supported
----------------
-
-The `sendMessage` calls supports a third parameter called `extra`. This parameter can be used to specify any values in the [Clickatell documentation](http://www.clickatell.com) that the library does not support as part of the public interface.
-
-5. Testing
----------------
+## Testing
 
 To run the library test suite just execute `npm test` from the library root. Please make sure all tests are passing before pushing back any changes.
